@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using api.Dtos.Comment;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 
 namespace api.Controllers
 {
@@ -11,9 +13,11 @@ namespace api.Controllers
     public class CommentController : ControllerBase
     {
         private readonly Interfaces.ICommentRepository _commentRepo;
-        public CommentController(Interfaces.ICommentRepository commentRepo)
+        private readonly Interfaces.IStockRepository _stockRepo;
+        public CommentController(Interfaces.ICommentRepository commentRepo, Interfaces.IStockRepository stockRepo)
         {
             _commentRepo = commentRepo;
+            _stockRepo = stockRepo;
         }
 
         [HttpGet]
@@ -36,6 +40,19 @@ namespace api.Controllers
             }
 
             return Ok(comment.TCommentDto());
+        }
+
+        [HttpPost("{stockId}")]
+        public async Task<IActionResult> Create([FromRoute] int stockId, CreateCommentDto commentDto)
+        {
+            if (!await _stockRepo.StockExists(stockId))
+            {
+                return BadRequest("Stock with the given ID does not exist.");
+            }
+
+            var commentModel = commentDto.ToCommentFromCreate(stockId);
+            await _commentRepo.CreateAsync(commentModel);
+            return CreatedAtAction(nameof(GetById), new { id = commentModel }, commentModel.TCommentDto());
         }
     }
 }
