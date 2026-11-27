@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Data
 {
-    public class ApplicationDB_context : DbContext
+    public class ApplicationDB_context : IdentityDbContext<api.Models.AppUser>
     {
         public ApplicationDB_context(DbContextOptions<ApplicationDB_context> options) : base(options)
         {
